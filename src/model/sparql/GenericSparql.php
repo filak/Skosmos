@@ -1135,7 +1135,7 @@ EOQ;
             $labelpriority = '';
         }
         $query = <<<EOQ
-SELECT DISTINCT ?s ?label ?plabel ?alabel ?hlabel ?graph ?notation (GROUP_CONCAT(DISTINCT STR(?type);separator=' ') as ?types) $extravars 
+SELECT DISTINCT ?s ?label ?plabel ?alabel ?hlabel ?graph (GROUP_CONCAT(DISTINCT STR(?type);separator=' ') as ?types) $extravars 
 $fcl
 WHERE {
  $gcl {
