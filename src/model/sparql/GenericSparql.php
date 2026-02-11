@@ -1135,7 +1135,9 @@ EOQ;
             $labelpriority = '';
         }
         $query = <<<EOQ
-SELECT DISTINCT ?s ?label ?plabel ?alabel ?hlabel ?graph (GROUP_CONCAT(DISTINCT STR(?type);separator=' ') as ?types) $extravars 
+SELECT DISTINCT ?s ?label ?plabel ?alabel ?hlabel ?graph
+       (GROUP_CONCAT(DISTINCT STR(?notation); separator=' ') AS ?notations)
+       (GROUP_CONCAT(DISTINCT STR(?type); separator=' ') AS ?types)
 $fcl
 WHERE {
  $gcl {
@@ -1144,7 +1146,7 @@ WHERE {
   }
   $labelpriority
   $formattedtype
-  { $pgcond 
+  { $pgcond
    ?s a ?type .
    $extrafields $schemecond
   }
@@ -1152,7 +1154,7 @@ WHERE {
  }
  $filterGraph
 }
-GROUP BY ?s ?match ?label ?plabel ?alabel ?hlabel ?notation ?graph
+GROUP BY ?s ?match ?label ?plabel ?alabel ?hlabel ?graph
 ORDER BY LCASE(STR(?match)) LANG(?match) $orderextra
 EOQ;
         return $query;
