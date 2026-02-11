@@ -602,12 +602,24 @@ class Concept extends VocabularyDataObject implements Modifiable
                     }
                 }
 
-                // Iterating through every literal and adding these to the data object.
                 foreach ($this->resource->allLiterals($sprop) as $literalValue) {
                     $literal = new ConceptPropertyValueLiteral($this->model, $this->vocab, $this->resource, $literalValue, $prop);
-                    // only add literals when they match the content/hit language or have no language defined OR when they are literals of a multilingual property
-                    if (isset($propertiesWithValues[$prop]) && ($literal->getLang() === $this->clang || $literal->getLang() === null) || $this->vocab->getConfig()->hasMultiLingualProperty($prop)) {
-                        $propertiesWithValues[$prop]->addValue($literal);
+
+                    // Get the property object if it exists
+                    $propertyObject = $propertiesWithValues[$prop] ?? null;
+
+                    if ($propertyObject !== null &&
+                        ($literal->getLang() === $this->clang || $literal->getLang() === null || $this->vocab->getConfig()->hasMultiLingualProperty($prop))) {
+
+                        $propertyObject->addValue($literal);
+
+                        // safe logging
+                        $propertyId = $propertyObject->ID ?? $prop;
+                        error_log("Adding value for property {$propertyId} in language {$literal->getLang()}");
+
+                    } else {
+                        // safe logging
+                        error_log("Skipping null property object for property '{$prop}' in language {$literal->getLang()}");
                     }
                 }
 
