@@ -134,7 +134,7 @@ function startChangesApp () {
       }
     },
     template: `
-      <div v-click-tab-changes="handleClickChangesEvent" v-resize-window="setListStyle">
+      <div v-click-tab-changes="handleClickChangesEvent" v-click-collapse-btn="setListStyle" v-resize-window="setListStyle">
         <tab-changes
           :changed-concepts="changedConcepts"
           :selected-concept="selectedConcept"
@@ -160,6 +160,19 @@ function startChangesApp () {
     },
     unmounted: el => {
       document.querySelector('#changes').removeEventListener('click', el.clickTabEvent)
+    }
+  })
+
+  /* Custom directive used to add an event listener on clicks on the sidebar-collapse-btn element on mobile */
+  tabChangesApp.directive('click-collapse-btn', {
+    beforeMount: (el, binding) => {
+      el.clickTabEvent = event => {
+        binding.value() // calling the method given as the attribute value (seListStyle)
+      }
+      document.querySelector('#sidebar-collapse-btn').addEventListener('click', el.clickTabEvent) // registering an event listener on clicks on the sidebar-collapse-btn element on mobile
+    },
+    unmounted: el => {
+      document.querySelector('#sidebar-collapse-btn').removeEventListener('click', el.clickTabEvent)
     }
   })
 
@@ -204,26 +217,26 @@ function startChangesApp () {
                   <a :class="{ 'selected': selectedConcept === concept.uri }"
                     :href="getConceptURL(concept.uri)"
                     @click="loadConcept($event, concept.uri)"
-                    :aria-label="toConceptPageAriaMessage"
                   >
                     <s>{{ concept.prefLabel }}</s>
+                    <span class="visually-hidden">{{ toConceptPageAriaMessage }}</span>
                   </a>
                   <i class="fa-solid fa-arrow-right"></i>
                   <a :class="{ 'selected': selectedConcept === concept.replacedBy }"
                     :href="getConceptURL(concept.replacedBy)"
                     @click="loadConcept($event, concept.replacedBy)"
-                    :aria-label="toConceptPageAriaMessage"
                   >
                     {{ concept.replacingLabel }}
+                    <span class="visually-hidden">{{ toConceptPageAriaMessage }}</span>
                   </a>
                 </template>
                 <template v-else>
                   <a :class="{ 'selected': selectedConcept === concept.uri }"
                     :href="getConceptURL(concept.uri)"
                     @click="loadConcept($event, concept.uri)"
-                    :aria-label="toConceptPageAriaMessage"
                   >
                     {{ concept.prefLabel }}
+                    <span class="visually-hidden">{{ toConceptPageAriaMessage }}</span>
                   </a>
                 </template>
               </li>

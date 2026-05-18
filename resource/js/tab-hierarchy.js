@@ -16,7 +16,7 @@ function startHierarchyApp () {
       openAriaMessage () {
         return $t('Open')
       },
-      goToTheConceptPageAriaMessage () {
+      toConceptPageAriaMessage () {
         return $t('Go to the concept page')
       }
     },
@@ -344,7 +344,7 @@ function startHierarchyApp () {
       }
     },
     template: `
-      <div v-click-tab-hierarchy="handleClickHierarchyEvent" v-resize-window="setListStyle">
+      <div v-click-tab-hierarchy="handleClickHierarchyEvent" v-click-collapse-btn="setListStyle" v-resize-window="setListStyle">
         <div id="hierarchy-list" class="sidebar-list p-0" :style="listStyle">
           <ul class="list-group" v-if="!loadingHierarchy">
             <tab-hier-wrapper
@@ -352,7 +352,7 @@ function startHierarchyApp () {
               :selectedConcept="selectedConcept"
               :loadingChildren="loadingChildren"
               :openAriaMessage="openAriaMessage"
-              :goToTheConceptPageAriaMessage="goToTheConceptPageAriaMessage"
+              :toConceptPageAriaMessage="toConceptPageAriaMessage"
               @load-children="loadChildren($event)"
               @select-concept="selectedConcept = $event"
             ></tab-hier-wrapper>
@@ -378,6 +378,19 @@ function startHierarchyApp () {
     }
   })
 
+  /* Custom directive used to add an event listener on clicks on the sidebar-collapse-btn element on mobile */
+  tabHierApp.directive('click-collapse-btn', {
+    beforeMount: (el, binding) => {
+      el.clickTabEvent = event => {
+        binding.value() // calling the method given as the attribute value (seListStyle)
+      }
+      document.querySelector('#sidebar-collapse-btn').addEventListener('click', el.clickTabEvent) // registering an event listener on clicks on the sidebar-collapse-btn element on mobile
+    },
+    unmounted: el => {
+      document.querySelector('#sidebar-collapse-btn').removeEventListener('click', el.clickTabEvent)
+    }
+  })
+
   /* Custom directive used to add an event listener on resizing the window */
   tabHierApp.directive('resize-window', {
     beforeMount: (el, binding) => {
@@ -392,7 +405,7 @@ function startHierarchyApp () {
   })
 
   tabHierApp.component('tab-hier-wrapper', {
-    props: ['hierarchy', 'selectedConcept', 'loadingChildren', 'openAriaMessage', 'goToTheConceptPageAriaMessage'],
+    props: ['hierarchy', 'selectedConcept', 'loadingChildren', 'openAriaMessage', 'toConceptPageAriaMessage'],
     emits: ['loadChildren', 'selectConcept'],
     mounted () {
       // scroll automatically to selected concept after the whole hierarchy tree has been mounted
@@ -432,7 +445,7 @@ function startHierarchyApp () {
           :isLast="i == hierarchy.length - 1"
           :loadingChildren="loadingChildren"
           :openAriaMessage="openAriaMessage"
-          :goToTheConceptPageAriaMessage="goToTheConceptPageAriaMessage"
+          :toConceptPageAriaMessage="toConceptPageAriaMessage"
           @load-children="loadChildren($event)"
           @select-concept="selectConcept($event)"
         ></tab-hier>
@@ -441,7 +454,7 @@ function startHierarchyApp () {
   })
 
   tabHierApp.component('tab-hier', {
-    props: ['concept', 'selectedConcept', 'isTopConcept', 'isLast', 'loadingChildren', 'openAriaMessage', 'goToTheConceptPageAriaMessage'],
+    props: ['concept', 'selectedConcept', 'isTopConcept', 'isLast', 'loadingChildren', 'openAriaMessage', 'toConceptPageAriaMessage'],
     emits: ['loadChildren', 'selectConcept'],
     inject: ['partialPageLoad', 'getConceptURL', 'showNotation'],
     methods: {
@@ -481,10 +494,10 @@ function startHierarchyApp () {
           <a :class="{ 'selected': selectedConcept === concept.uri }"
             :href="getConceptURL(concept.uri)"
             @click="handleClickConceptEvent($event, concept)"
-            :aria-label="goToTheConceptPageAriaMessage"
           >
             <span v-if="showNotation && concept.notation" class="concept-notation">{{ concept.notation }} </span>
             {{ concept.label }}
+            <span class="visually-hidden">{{ toConceptPageAriaMessage }}</span>
           </a>
         </span>
         <ul class="list-group ps-3" v-if="concept.children.length !== 0 && concept.isOpen">
@@ -493,7 +506,7 @@ function startHierarchyApp () {
               :concept="c"
               :selectedConcept="selectedConcept"
               :openAriaMessage="openAriaMessage"
-              :goToTheConceptPageAriaMessage="goToTheConceptPageAriaMessage"
+              :toConceptPageAriaMessage="toConceptPageAriaMessage"
               :isTopConcept="false"
               :isLast="i == concept.children.length - 1"
               :loadingChildren="loadingChildren"

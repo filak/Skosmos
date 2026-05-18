@@ -23,7 +23,7 @@ function startGroupsApp () {
       openAriaMessage () {
         return $t('Open')
       },
-      goToTheConceptPageAriaMessage () {
+      toConceptPageAriaMessage () {
         return $t('Go to the concept page')
       }
     },
@@ -183,7 +183,7 @@ function startGroupsApp () {
       }
     },
     template: `
-      <div v-click-tab-groups="handleClickGroupsEvent" v-resize-window="setListStyle">
+      <div v-click-tab-groups="handleClickGroupsEvent" v-click-collapse-btn="setListStyle" v-resize-window="setListStyle">
         <div id="groups-list" class="sidebar-list p-0" :style="listStyle">
           <ul v-if="!loadingGroups" class="list-group">
             <tab-groups-wrapper
@@ -191,7 +191,7 @@ function startGroupsApp () {
               :selectedGroup="selectedGroup"
               :loadingChildren="loadingChildren"
               :openAriaMessage="openAriaMessage"
-              :goToTheConceptPageAriaMessage="goToTheConceptPageAriaMessage"
+              :toConceptPageAriaMessage="toConceptPageAriaMessage"
               @load-children="loadChildren($event)"
               @select-group="selectedGroup = $event"
             ></tab-groups-wrapper>
@@ -215,6 +215,19 @@ function startGroupsApp () {
     }
   })
 
+  /* Custom directive used to add an event listener on clicks on the sidebar-collapse-btn element on mobile */
+  tabGroupsApp.directive('click-collapse-btn', {
+    beforeMount: (el, binding) => {
+      el.clickTabEvent = event => {
+        binding.value() // calling the method given as the attribute value (seListStyle)
+      }
+      document.querySelector('#sidebar-collapse-btn').addEventListener('click', el.clickTabEvent) // registering an event listener on clicks on the sidebar-collapse-btn element on mobile
+    },
+    unmounted: el => {
+      document.querySelector('#sidebar-collapse-btn').removeEventListener('click', el.clickTabEvent)
+    }
+  })
+
   /* Custom directive used to add an event listener on resizing the window */
   tabGroupsApp.directive('resize-window', {
     beforeMount: (el, binding) => {
@@ -229,7 +242,7 @@ function startGroupsApp () {
   })
 
   tabGroupsApp.component('tab-groups-wrapper', {
-    props: ['groups', 'selectedGroup', 'loadingChildren', 'openAriaMessage', 'goToTheConceptPageAriaMessage'],
+    props: ['groups', 'selectedGroup', 'loadingChildren', 'openAriaMessage', 'toConceptPageAriaMessage'],
     emits: ['loadChildren', 'selectGroup'],
     mounted () {
     },
@@ -250,7 +263,7 @@ function startGroupsApp () {
           :isLast="i == groups.length - 1"
           :loadingChildren="loadingChildren"
           :openAriaMessage="openAriaMessage"
-          :goToTheConceptPageAriaMessage="goToTheConceptPageAriaMessage"
+          :toConceptPageAriaMessage="toConceptPageAriaMessage"
           @load-children="loadChildren($event)"
           @select-group="selectGroup($event)"
         ></tab-groups>
@@ -259,7 +272,7 @@ function startGroupsApp () {
   })
 
   tabGroupsApp.component('tab-groups', {
-    props: ['group', 'selectedGroup', 'isTopGroup', 'isLast', 'loadingChildren', 'openAriaMessage', 'goToTheConceptPageAriaMessage'],
+    props: ['group', 'selectedGroup', 'isTopGroup', 'isLast', 'loadingChildren', 'openAriaMessage', 'toConceptPageAriaMessage'],
     emits: ['loadChildren', 'selectGroup'],
     inject: ['partialPageLoad', 'getConceptURL', 'showNotation'],
     methods: {
@@ -300,10 +313,10 @@ function startGroupsApp () {
           <a :class="{ 'selected': selectedGroup === group.uri, 'group': group.isGroup }"
             :href="getConceptURL(group.uri)"
             @click="handleClickGroupEvent($event, group)"
-            :aria-label="goToTheConceptPageAriaMessage"
           >
             <span v-if="showNotation && group.notation" class="concept-notation">{{ group.notation }} </span>
             {{ group.prefLabel }}
+            <span class="visually-hidden">{{ toConceptPageAriaMessage }}</span>
           </a>
         </span>
         <ul class="list-group ps-3" v-if="group.childGroups.length !== 0 && group.isOpen">
@@ -315,7 +328,7 @@ function startGroupsApp () {
               :isLast="i == group.childGroups.length - 1"
               :loadingChildren="loadingChildren"
               :openAriaMessage="openAriaMessage"
-              :goToTheConceptPageAriaMessage="goToTheConceptPageAriaMessage"
+              :toConceptPageAriaMessage="toConceptPageAriaMessage"
               @load-children="loadChildrenRecursive($event)"
               @select-group="selectGroupRecursive($event)"
             ></tab-groups>

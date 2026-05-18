@@ -24,9 +24,10 @@
 <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" media="screen, print" rel="stylesheet" type="text/css">
 <link href="resource/css/fonts.css" media="screen, print" rel="stylesheet" type="text/css">
 <link href="resource/css/skosmos.css" media="screen, print" rel="stylesheet" type="text/css">
-<link href="resource/fontawesome/css/fontawesome.css" rel="stylesheet">
-<link href="resource/fontawesome/css/solid.css" rel="stylesheet">
-<link href="resource/fontawesome/css/regular.css" rel="stylesheet">
+<link href="node_modules/@fortawesome/fontawesome-free/css/fontawesome.min.css" rel="stylesheet">
+<link href="node_modules/@fortawesome/fontawesome-free/css/brands.min.css" rel="stylesheet">
+<link href="node_modules/@fortawesome/fontawesome-free/css/solid.min.css" rel="stylesheet">
+<link href="node_modules/@fortawesome/fontawesome-free/css/regular.min.css" rel="stylesheet">
 {% if GlobalConfig.customCss %}
 <link href="{{ GlobalConfig.customCss }}" media="screen, print" rel="stylesheet" type="text/css">
 {% endif %}
@@ -44,8 +45,8 @@
           </button>
         </div>
       {% else %}
-        <a id="skosmos-logo-top" href="{{ 'home' | global_url(request.lang, request.contentLang, null, request.queryParam('anylang') == 'on') }}">
-          <h2 class="visually-hidden">Skosmos</h2>
+        <a id="skosmos-logo-top" class="service-{{ request.lang }}" href="{{ 'home' | global_url(request.lang, request.contentLang, null, request.queryParam('anylang') == 'on') }}">
+          <h2 id="service-name" class="visually-hidden">{% if GlobalConfig.serviceName is defined %}{{ GlobalConfig.serviceName }}{% else %}Skosmos{% endif %}</h2>
         </a>
       {% endif %}
       <ul class="nav nav-pills ms-auto my-auto gx-3 py-3" id="topbar-nav">
@@ -64,6 +65,7 @@
                    <i class="fa-solid fa-comment"></i>&nbsp;{{ "Feedback" | trans }}
           </a>
         </li>
+        {{ include('custom-templates.inc.twig', {slotName: 'topbar'}) }}
         {% if languages|length > 1 %}
         {% for langcode, langdata in languages %}
         {% if request.lang != langcode %}
@@ -89,12 +91,14 @@
     {% endif %}
     {% if pageType in ['landing', 'vocab-home', 'concept', 'vocab-search'] %}
     <div class="container-fluid py-4" id="headerbar">
-      <div id="headerbar-top-slot" class="row"></div>
+      <div id="headerbar-top-slot" class="row">
+        {{ include('custom-templates.inc.twig', {slotName: 'headerbar-top'}) }}
+      </div>
       <div class="row">
         <div class="d-flex flex-column flex-xl-row align-items-start align-items-xl-center my-auto{% if pageType == 'landing' %} p-0{% endif %}">
           {% if pageType == 'landing' %}
           <div id="skosmos-logo">
-            <h1 class="visually-hidden">Skosmos</h1>
+            <h1 class="visually-hidden">{{ GlobalConfig.serviceNameLong(request.lang) }}</h1>
           </div>
           {% else %}
           <h2 class="fw-bold" id="vocab-title">
@@ -108,7 +112,9 @@
           {% endif %}
         </div>
       </div>
-      <div id="headerbar-bottom-slot" class="row"></div>
+      <div id="headerbar-bottom-slot" class="row">
+        {{ include('custom-templates.inc.twig', {slotName: 'headerbar-bottom'}) }}
+      </div>
     </div>
     
     {% endif %}
@@ -124,7 +130,7 @@
       </div>
     </div>
   </main>
-  <footer class="py-5">
+  <footer>
   {{ include('custom-templates.inc.twig', {slotName: 'footer'}) }}
   </footer>
   {% include "scripts.inc.twig" %}

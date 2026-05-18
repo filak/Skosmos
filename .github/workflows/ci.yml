@@ -58,7 +58,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - name: Install JavaScript dependencies
         run: npm install
@@ -72,8 +72,10 @@ jobs:
       - name: Run PHPUnit tests
         run: ./vendor/bin/phpunit --configuration phpunit.xml
 
-      - name: Publish code coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   cypress-test:
     runs-on: ubuntu-latest
@@ -90,7 +92,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - name: Install JavaScript dependencies
         run: npm install
